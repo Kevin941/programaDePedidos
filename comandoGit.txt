@@ -1,0 +1,15 @@
+echo "# programaDePedidos" >> README.md
+git init
+git add .
+git commit -m "Creación de interfaz grafica, lectura de archivos de excel, creacion de tablas pedidosAntes y especificaciones, métodos funciones para creacion de columnas y filas de tablaPedidosDespues"
+git remote add origin https://Kevin941:AnilloFlor1github.com/Kevin941/programaDePedidos.git
+git push -u origin master
+
+Comando para almacenar credenciales: git config --global credential.helper wincred. 
+Luego modificar las credenciales en "Panel de control\Cuentas de usuario y protección infantil\Administrador de credenciales"
+
+git init
+git add .
+git commit -m "Creación de interfaz grafica, lectura de archivos de excel, creacion de tablas pedidosAntes y especificaciones, métodos funciones para creacion de columnas y filas de tablaPedidosDespues"
+git remote add origin https://github.com/Kevin941/programaDePedidos.git
+git push -u origin master

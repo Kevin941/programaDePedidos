@@ -1,0 +1,10 @@
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\tablasDePedidos.exe.config
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\tablasDePedidos.exe
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\tablasDePedidos.pdb
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.csprojResolveAssemblyReference.cache
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.Properties.Resources.resources
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.csproj.GenerateResource.Cache
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.exe
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.pdb
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formMenuPrincipal.resources
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formLoading.resources
