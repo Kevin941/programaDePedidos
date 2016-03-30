@@ -20,8 +20,8 @@ namespace tablasDePedidos
 
         //Se utiliza este delegado para modificar la interfaz gráfica a través del thread. 
         //Se especifica que este delegado tomara un objeto del tipo grid en el momento de su invocación "this.invoke()"
-        private delegate void delegadoParaInterfaz(DataGridView grid); 
-
+        private delegate void delegadoParaInterfaz(DataGridView grid);
+        private delegate void delegadoGridConString(string clave, DataGridView grid); 
         public formMenuPrincipal()
         {
             InitializeComponent();
@@ -29,28 +29,25 @@ namespace tablasDePedidos
 
         private void botonComenzar_Click(object sender, EventArgs e)
         {
-
-
-            /*
             MessageBox.Show("Por favor selecciona el archivo de especificaciones.");
             if (!tablaEspecificaciones.getPathOrigenEspecificaciones())
             {
                 return;
             }
-
+            
             MessageBox.Show("Por favor selecciona el archivo de pedidos.");
-            if (!tablaPedidosAnterior.getPathOrigenPedidos())
+
+            if (!tablaPedidosAntes.getPathOrigenPedidos())
             {
                 return;
-            }
-            //loadWindow.TopMost = true;  // make sure it doesn't get created behind other forms
-            ventanaCargando = new formLoading();
+            }            
+            
+            invocarProcedimientoPrincipal();           
+        }
+
+        void invocarProcedimientoPrincipal()
+        {
             ventanaCargando.Show();
-            */
-
-
-            //Mostrar la página de cargando... Se ocultará en el momento de terminar el proceso
-            ventanaCargando.Show(); 
 
 
             //Background worker es un thread. Se utilizará para realizar la creación de las tablas mientras aparece la página de cargando 
@@ -61,20 +58,28 @@ namespace tablasDePedidos
             //En el momento que se termina de ejecutar todo el procedimiento del thread se invoca "worker_RunWorkerCompleted"
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(procedimientoPrincipalTerminado);
             //Ejecuta el Thread
-            worker.RunWorkerAsync();            
+            worker.RunWorkerAsync();  
         }
-
         void procedimientoPrincipal(object sender, DoWorkEventArgs e)
         {
-            //Aquí va a ir todo el procedimiento para las tablas
-            //tablaEspecificaciones.getTablaEspecificaciones();
-            //tablaPedidosAnterior.getTablaPedidos();
+            //Se obtienen las tablas desde los excel. Los path ya se pidieron antes. 
+            if(tablaEspecificaciones.tablaEspecificaciones.Rows.Count < 1)
+                tablaEspecificaciones.getTablaEspecificaciones();
 
-            tablaPedidosDespues.getTablaDePedidos();
+            if (tablaPedidosAntes.tablaPedidos.Rows.Count < 1)
+                tablaPedidosAntes.getTablaPedidos();
 
+            tablaPedidosDespues.copiarTablas(tablaPedidosAntes.tablaPedidos, tablaEspecificaciones.tablaEspecificaciones);
+
+            //Delegate delegado = new delegadoParaInterfaz(tablaPedidosDespues.mostrarPedidosEnGrid);
+            //this.Invoke(delegado, dataGridPedidos); 
+
+            //Delegate delegado = new delegadoGridConString(tablaEspecificaciones.getRegistrosByClave);
+            //this.Invoke(delegado, ".17A55104E0", dataGridPedidos);       
+            
             //Se crea un delegado para poder modificar la interfaz del usuario a través del thread
-            Delegate delegado = new delegadoParaInterfaz(tablaPedidosDespues.mostrarPedidosEnGrid);
-            this.Invoke(delegado, dataGridPedidos); 
+            //Delegate delegado = new delegadoParaInterfaz(tablaPedidosDespues.mostrarPedidosEnGrid);
+            //this.Invoke(delegado, dataGridPedidos); 
 
             //tablaPedidosDespues.generarExcelDesdeDataTable(tablaPedidosAnterior.tablaPedidos); 
             
@@ -92,6 +97,18 @@ namespace tablasDePedidos
         private void pictureBoxMenuPrincipal_Click(object sender, EventArgs e)
         {
              
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            invocarProcedimientoPrincipal(); 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            classTablasDePrueba nueva = new classTablasDePrueba();
+            dataGridPedidos.DataSource = nueva.getListaDeNombresDeColumnasEspecificaciones();
+
         }
     }
 

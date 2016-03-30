@@ -21,13 +21,14 @@ namespace tablasDePedidos
         public string connectionStringEspecificaciones = ""; 
         public OpenFileDialog dialogoParaArchivo = new OpenFileDialog();
         public System.Data.DataTable tablaEspecificaciones = new System.Data.DataTable();
-        
+        public System.Data.DataTable foundRowsTable;
+        public DataRow[] foundRows;
         string pathArchivoExcelOrigenEspecificaciones = "";
         public formLoading loadWindow = new formLoading();
         public void getConnectionStringEspecificaciones()
         {
             connectionStringEspecificaciones = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source="+ this.pathArchivoExcelOrigenEspecificaciones + "; Extended Properties="+"\""+ "Excel 12.0 Macro;HDR=YES" + "\"" + ";"; 
-            MessageBox.Show(connectionStringEspecificaciones); 
+            //MessageBox.Show(connectionStringEspecificaciones); 
             return;
         }
 
@@ -37,6 +38,51 @@ namespace tablasDePedidos
 
         }
 
+        public void getRegistrosByClave(string clave, DataGridView grid)
+        {
+            foundRowsTable = tablaEspecificaciones.Clone(); 
+            foundRows = tablaEspecificaciones.Select("clave like " + "'%"+ clave + "%'");
+            foreach (DataRow row in foundRows)
+            {
+                foundRowsTable.ImportRow(row); 
+            }
+
+            grid.DataSource = foundRowsTable; 
+
+        }
+        public int getRegistrosByClave(string clave)
+        {
+            foundRowsTable = new System.Data.DataTable(); 
+            foundRowsTable = tablaEspecificaciones.Clone();
+            foundRows = tablaEspecificaciones.Select("clave like " + "'%" + clave + "%'");
+            foreach (DataRow row in foundRows)
+            {
+                foundRowsTable.ImportRow(row);
+            }
+            return foundRowsTable.Rows.Count; 
+        }
+
+        public void normalizarClave(string clave)
+        {
+            int cantidadRegistros = getRegistrosByClave("papalopaltaoca"); 
+        }
+        public void getRegistroByClave(string clave, DataGridView grid)
+        {
+            int x=0; 
+            for (x = 0; x < tablaEspecificaciones.Rows.Count; x++)
+            {
+                string valor1= tablaEspecificaciones.Rows[x][0].ToString();
+                string valor2= tablaEspecificaciones.Rows[x]["F1"].ToString();
+                if (valor2 == clave)
+               {
+                   break;
+               }
+            }
+
+            grid.DataSource =  tablaEspecificaciones.Rows[x];
+
+            return;
+        }
 
         public bool getPathOrigenEspecificaciones()
         {
@@ -54,7 +100,7 @@ namespace tablasDePedidos
                 {
 
                     pathArchivoExcelOrigenEspecificaciones = dialogoParaArchivo.FileName;
-                    MessageBox.Show("El path es : " + pathArchivoExcelOrigenEspecificaciones);
+                    //MessageBox.Show("El path es : " + pathArchivoExcelOrigenEspecificaciones);
                     return true;
                 }
                 else
@@ -78,7 +124,46 @@ namespace tablasDePedidos
                 conexion.ConnectionString = this.connectionStringEspecificaciones;
                 OleDbCommand comando = new OleDbCommand();
                 //F1 es el nombre de la primera columna del archivo
-                comando.CommandText = "Select * from [Hoja de Especificaciones grales$];";
+                comando.CommandText = "Select " +
+                    "[F1] AS `clave`, " +
+                    "[Generales] AS `nombreDelCliente`, " +
+                    "[Generales2] AS `D`, " +
+                    "[Generales3] AS `E`, " +
+                    "[Generales1] AS `C`, " +
+                    "[Materiales] AS `L`, " +
+                    "[Hoja de Especificaciones grales$.Pigmentos] AS `O`, " +
+                    "[Generales4] AS `F`, " +
+                    "[Peinado / Lubricado] AS `AU`, " +
+                    "[Generales5] AS `G`, " +
+                    "[Rizado2] AS `K`, " +
+                    "[Horno de secado] AS `M`, " +
+                    "[Extrusión5] AS `U`, " +
+                    "[Extrusión7] AS `W`, " +
+                    "[Embobinado Carretes] AS `AD`, " +
+                    "[Embobinado Carretes1] AS `AE`, " +
+                    "[Embobinado Carretes2] AS `AF`, " +
+                    "[Embobinado Carretes3] AS `AG`, " +
+                    "[Embobinado Carretes4] AS `AH`, " +
+                    "[Embobinado Carretes5] AS `AI`, " +
+                    "[Embobinado Carretes6] AS `AJ`, " +
+                    "[Embobinado Carretes7] AS `AK`, " +
+                    "[Embobinado Carretes9] AS `AM`, " +
+                    "[Rizado] AS `I`, " +
+                    "[Rizado1] AS `J`, " +
+                    "[Generales6] AS `H`, " +
+                    "[Aditivos] AS `N`, " +
+                    "[Embobinado] AS `AN`, " +
+                    "[Extrusión1] AS `Q`, " +
+                    "[Extrusión] AS `P`, " +
+                    "[Extrusión2] AS `R`, " +
+                    "[Extrusión6] AS `V`, " +
+                    "[Extrusión13] AS `AC`, " +
+                    "[Templado] AS `AP`, " +
+                    "[Templado1] AS `AQ`, " +
+                    "[Templado / Horno de Mazos] AS `AS`, " +
+                    "[Teñido] AS `AT`, " +
+                    "[Enfundado / Forrado / Marcado] AS `AX` " +                                                        
+                    "from [Hoja de Especificaciones grales$];";
                 //comando.CommandText = "Select * from [Hoja de Especificaciones grales$A3] where NOT 'F1' = '';"; 
                 comando.Connection = conexion;
                 DataSet setDatos = new DataSet();
