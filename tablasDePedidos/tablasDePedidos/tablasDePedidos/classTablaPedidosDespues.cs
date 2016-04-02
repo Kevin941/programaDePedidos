@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -17,6 +18,14 @@ namespace tablasDePedidos
         public System.Data.DataTable tablaEspecificaciones = new System.Data.DataTable();
         Dictionary<string, string> diccionarioDeColumnas = new Dictionary<string, string>();
         public System.Data.DataTable foundRowsTable;
+        public System.Data.DataTable foundRowsTableClientes;
+        public System.Data.DataTable clienteActualTable;
+        public formVentanaInteractiva ventanaInteractiva; 
+        ArrayList arregloClavesNoEncontradas = new ArrayList();
+        int indiceDefinitivoPorIteracion = 0;
+        string claveActual = "";
+        string clienteActual = "";
+
         public DataRow[] foundRows;
         
         #endregion
@@ -253,8 +262,41 @@ namespace tablasDePedidos
             }
             return foundRowsTable.Rows.Count; 
         }
+
+        public int getClienteActualRowInTable(DataRow fila)
+        {
+            clienteActualTable = new System.Data.DataTable();
+            clienteActualTable = tablaEspecificaciones.Clone();
+            clienteActualTable.ImportRow(fila);
+
+            return clienteActualTable.Rows.Count;
+        }
+
+        public int getRegistrosByClaveAndClienteEnEspecificaciones(string clave, string cliente)
+        {
+            //Se copian los nombre de las columnas en la tabla foundRowsTable
+            foundRowsTableClientes = new System.Data.DataTable();
+            foundRowsTableClientes = tablaEspecificaciones.Clone();
+
+            foundRows = tablaEspecificaciones.Select(
+                "clave like " + "'%" + clave + "%'" + 
+                " AND " + 
+                "nombreDelCliente like " + "'%" + cliente + "%'"
+                );
+            foreach (DataRow row in foundRows)
+            {
+                foundRowsTableClientes.ImportRow(row);
+            }
+            return foundRowsTableClientes.Rows.Count; 
+        }
         public void getTablaDePedidos()
         {
+            
+
+            
+            //Si funciona el showDialog aunque se invoque este método desde un hilo
+            //formMenuPrincipal ventana = new formMenuPrincipal();
+            //ventana.ShowDialog(); 
             //Creamos una nueva tabla
             tablaPedidosDespues = new DataTable();
             
@@ -262,9 +304,13 @@ namespace tablasDePedidos
             generarColumnasParaLaTabla(); 
 
 
+            //Aquí va el procedimiento para cada uno de los índices de la tabla de Pedidos anterior
+            llenarValoresDeTablaPedidosDespues(); 
 
-            //Se actualizan los valores del arreglo para introducirlo a la tabla 
-            diccionarioDeColumnas["Nombre del Cliente"]= "valor"; 
+            mostrarReporte(); 
+                
+            //Se actualizan los valores del arreglo para introducirlo a la tabla. 
+            diccionarioDeColumnas["Nombre del Cliente"] = "valor"; 
             diccionarioDeColumnas["Cantidad_Kg"]= "valor"; 
             diccionarioDeColumnas["Unidad_Original"]= "valor"; 
             diccionarioDeColumnas["Calibre"]= "valor"; 
@@ -300,6 +346,72 @@ namespace tablasDePedidos
             
 
             
+        }
+
+        private void llenarValoresDeTablaPedidosDespues()
+        {
+            for (int x = 0; x < tablaPedidosAntes.Rows.Count; x++)
+            {
+
+
+                //Se utiliza el número del indice en caso de que el nombre de la columna se modifique. 
+                claveActual = tablaPedidosAntes.Rows[x][6].ToString();  //claveActual = tablaPedidosAntes.Rows[x]["Clave"].ToString(); 
+                clienteActual = tablaPedidosAntes.Rows[x][0].ToString(); //clienteActual = tablaPedidosAntes.Rows[0]["Nombre del Cliente"].ToString();
+
+
+                //Se obtienen todos los registros encontrados para la clave actual y se almacena en "foundRowsTable"
+                int encontrados = getRegistrosByClaveEnEspecificaciones(claveActual);
+                if (encontrados > 0)
+                {
+
+
+                    //Buscar en esa tabla los valores con el cliente específico y guardarlos en la tabla "foundRowsTableClientes"
+                    encontrados = getRegistrosByClaveAndClienteEnEspecificaciones(claveActual, clienteActual);
+
+                    //Caso 1: Se ha encontrado un cliente para esa clave
+                    if (encontrados == 1)
+                    {
+                        //Tomar ese único registro encotrado 
+                        MessageBox.Show("Correcto. Se ha encontrado la clave y un solo cliente.");
+                    }
+                    else
+                        //Caso 2: Se han encontrado más de un cliente para esa clave. 
+                        if (encontrados > 1)
+                        {
+                            mostrarVentanaInteractiva("Se ha encontrado más de un cliente para la clave " + claveActual);
+                        }
+                        //Caso 3: Clave encontrada; pero cliente no encontrado. 
+                        else
+                            if (encontrados == 0)
+                            {
+                                mostrarVentanaInteractiva("No se ha encontrado ningún cliente para la clave " + claveActual);
+
+                                //Cuando se cierre el diálogo se debera de acceder al índice seleccionado por el cliente en la tabla de "foundRowsTable"
+                            }
+
+                }
+                //Caso 4: No se encontró la clave
+                else
+                {
+                    MessageBox.Show("No se ha encontrado la clave"); 
+                    arregloClavesNoEncontradas.Add(claveActual);
+                    return;
+                }
+            }
+        }
+
+        private void mostrarVentanaInteractiva(string aviso)
+        {
+            MessageBox.Show(aviso); 
+            getClienteActualRowInTable(tablaPedidosAntes.Rows[0]);
+            ventanaInteractiva = new formVentanaInteractiva(foundRowsTable, clienteActualTable);
+            ventanaInteractiva.ShowDialog();
+        }
+
+        private void mostrarReporte()
+        {
+            formReportePrograma ventanaReporte = new formReportePrograma(arregloClavesNoEncontradas);
+            ventanaReporte.ShowDialog(); 
         }
         
     }

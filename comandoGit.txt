@@ -13,3 +13,6 @@ git add .
 git commit -m "Creación de interfaz grafica, lectura de archivos de excel, creacion de tablas pedidosAntes y especificaciones, métodos funciones para creacion de columnas y filas de tablaPedidosDespues"
 git remote add origin https://github.com/Kevin941/programaDePedidos.git
 git push -u origin master
+
+//Para subir algo de la cuenta de kevin001rosas desde la cuenta de PMM 
+git push --set-upstream origin master

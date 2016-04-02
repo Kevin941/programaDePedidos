@@ -20,7 +20,8 @@ namespace tablasDePedidos
 
         //Se utiliza este delegado para modificar la interfaz gráfica a través del thread. 
         //Se especifica que este delegado tomara un objeto del tipo grid en el momento de su invocación "this.invoke()"
-        private delegate void delegadoParaInterfaz(DataGridView grid);
+        private delegate void delegadoParaUtilizarGrid(DataGridView grid);
+        private delegate void delegadoParaUtilizarDosGrids(DataGridView grid, DataGridView grid2);
         private delegate void delegadoGridConString(string clave, DataGridView grid); 
         public formMenuPrincipal()
         {
@@ -63,17 +64,19 @@ namespace tablasDePedidos
         void procedimientoPrincipal(object sender, DoWorkEventArgs e)
         {
             //Se obtienen las tablas desde los excel. Los path ya se pidieron antes. 
-            if(tablaEspecificaciones.tablaEspecificaciones.Rows.Count < 1)
+            //if(tablaEspecificaciones.tablaEspecificaciones.Rows.Count < 1)
                 tablaEspecificaciones.getTablaEspecificaciones();
 
-            if (tablaPedidosAntes.tablaPedidos.Rows.Count < 1)
+            //if (tablaPedidosAntes.tablaPedidos.Rows.Count < 1)
                 tablaPedidosAntes.getTablaPedidos();
-
+            
             tablaPedidosDespues.copiarTablas(tablaPedidosAntes.tablaPedidos, tablaEspecificaciones.tablaEspecificaciones);
-
+            tablaPedidosDespues.getTablaDePedidos(); 
             //Delegate delegado = new delegadoParaInterfaz(tablaPedidosDespues.mostrarPedidosEnGrid);
             //this.Invoke(delegado, dataGridPedidos); 
 
+            //Delegate delegado = new delegadoParaUtilizarDosGrids(tablaPedidosDespues.getTablaDePedidos);
+            //this.Invoke(delegado, dataGridPedidos, dataGridPedidos); 
             //Delegate delegado = new delegadoGridConString(tablaEspecificaciones.getRegistrosByClave);
             //this.Invoke(delegado, ".17A55104E0", dataGridPedidos);       
             
