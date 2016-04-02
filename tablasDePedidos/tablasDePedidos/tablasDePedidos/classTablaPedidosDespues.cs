@@ -124,8 +124,41 @@ namespace tablasDePedidos
         #endregion 
 
 
-        private void agregaRegistroEnTabla()
+        private void agregaRegistroEnTabla(int indicePedidosAntes, int indiceEspecificacionesReducida)
         {
+            //Aquí se deben copiar los atributos de la tabla foundRowsTable en el indiceDefinitivoPorIteracion
+            //Combinar con los registros de la tabla tablaPedidosAntes.Rows[x]
+            //Y meterlos en el siguiente renglon de la tablaPedidosDespués
+
+            //Se actualizan los valores del arreglo para introducirlo a la tabla. 
+            diccionarioDeColumnas["Nombre del Cliente"] = tablaPedidosAntes.Rows[indicePedidosAntes][0].ToString();
+            diccionarioDeColumnas["Cantidad_Kg"] = foundRowsTable.Rows[indiceEspecificacionesReducida][0].ToString();
+            diccionarioDeColumnas["Unidad_Original"] = "valor";
+            diccionarioDeColumnas["Calibre"] = "valor";
+            diccionarioDeColumnas["Color"] = "valor";
+            diccionarioDeColumnas["Material"] = "valor";
+            diccionarioDeColumnas["Resina"] = "valor";
+            diccionarioDeColumnas["Clave"] = "valor";
+            diccionarioDeColumnas["Corte"] = "valor";
+            diccionarioDeColumnas["Lubricante"] = "valor";
+            diccionarioDeColumnas["Orientación"] = "valor";
+            diccionarioDeColumnas["No pedido"] = "valor";
+            diccionarioDeColumnas["Fecha Entrega"] = "valor";
+            diccionarioDeColumnas["ESP_SAE"] = "valor";
+            diccionarioDeColumnas["Rizado"] = "valor";
+            diccionarioDeColumnas["Perfil"] = "valor";
+            diccionarioDeColumnas["Aditivos"] = "valor";
+            diccionarioDeColumnas["Tipo de Mazo"] = "valor";
+            diccionarioDeColumnas["Bastón_Espejo_Tina"] = "valor";
+            diccionarioDeColumnas["Herramental"] = "valor";
+            diccionarioDeColumnas["Fabricar"] = "valor";
+            diccionarioDeColumnas["Temple"] = "valor";
+            diccionarioDeColumnas["Horno"] = "valor";
+            diccionarioDeColumnas["Teñido"] = "valor";
+            diccionarioDeColumnas["Enfundado"] = "valor";
+            diccionarioDeColumnas["Esp_Carretes"] = "valor";
+
+            //Se meten los valores a la tabla
             tablaPedidosDespues.Rows.Add(
                diccionarioDeColumnas["Nombre del Cliente"],
                diccionarioDeColumnas["Cantidad_Kg"],
@@ -263,10 +296,10 @@ namespace tablasDePedidos
             return foundRowsTable.Rows.Count; 
         }
 
-        public int getClienteActualRowInTable(DataRow fila)
+        public int getPedidoActualRowInTable(DataRow fila)
         {
             clienteActualTable = new System.Data.DataTable();
-            clienteActualTable = tablaEspecificaciones.Clone();
+            clienteActualTable = tablaPedidosAntes.Clone();
             clienteActualTable.ImportRow(fila);
 
             return clienteActualTable.Rows.Count;
@@ -309,38 +342,9 @@ namespace tablasDePedidos
 
             mostrarReporte(); 
                 
-            //Se actualizan los valores del arreglo para introducirlo a la tabla. 
-            diccionarioDeColumnas["Nombre del Cliente"] = "valor"; 
-            diccionarioDeColumnas["Cantidad_Kg"]= "valor"; 
-            diccionarioDeColumnas["Unidad_Original"]= "valor"; 
-            diccionarioDeColumnas["Calibre"]= "valor"; 
-            diccionarioDeColumnas["Color"]= "valor"; 
-            diccionarioDeColumnas["Material"]= "valor"; 
-            diccionarioDeColumnas["Resina"]= "valor"; 
-            diccionarioDeColumnas["Clave"]= "valor"; 
-            diccionarioDeColumnas["Corte"]= "valor"; 
-            diccionarioDeColumnas["Lubricante"]= "valor"; 
-            diccionarioDeColumnas["Orientación"]= "valor"; 
-            diccionarioDeColumnas["No pedido"]= "valor"; 
-            diccionarioDeColumnas["Fecha Entrega"]= "valor"; 
-            diccionarioDeColumnas["ESP_SAE"]= "valor"; 
-            diccionarioDeColumnas["Rizado"]= "valor"; 
-            diccionarioDeColumnas["Perfil"]= "valor"; 
-            diccionarioDeColumnas["Aditivos"]= "valor"; 
-            diccionarioDeColumnas["Tipo de Mazo"]= "valor"; 
-            diccionarioDeColumnas["Bastón_Espejo_Tina"]= "valor"; 
-            diccionarioDeColumnas["Herramental"]= "valor"; 
-            diccionarioDeColumnas["Fabricar"]= "valor"; 
-            diccionarioDeColumnas["Temple"]= "valor"; 
-            diccionarioDeColumnas["Horno"]= "valor"; 
-            diccionarioDeColumnas["Teñido"]= "valor"; 
-            diccionarioDeColumnas["Enfundado"]= "valor"; 
-            diccionarioDeColumnas["Esp_Carretes"]= "valor"; 
+            
 
-            //Meter el valor actual del diccionario a la tabla de pedidos
-            agregaRegistroEnTabla(); 
-
-            //Agremamos tantos registros como queramos 
+            
            
             
             
@@ -372,20 +376,26 @@ namespace tablasDePedidos
                     if (encontrados == 1)
                     {
                         //Tomar ese único registro encotrado 
-                        MessageBox.Show("Correcto. Se ha encontrado la clave y un solo cliente.");
+                        MessageBox.Show("Caso 1: Correcto. Se ha encontrado la clave y un solo cliente.");
+                        indiceDefinitivoPorIteracion = 0; 
                     }
                     else
-                        //Caso 2: Se han encontrado más de un cliente para esa clave. 
+                        //Caso 2: Se ha encontrado más de un cliente para esa clave. 
                         if (encontrados > 1)
                         {
-                            mostrarVentanaInteractiva("Se ha encontrado más de un cliente para la clave " + claveActual);
+                            //Verificar si es mezcla Antes de mostrar la ventana interactiva. 
+                            verificarMezcla(); 
+                            mostrarVentanaInteractiva("Caso 2: Se ha encontrado más de un cliente '"+clienteActual + "'la clave. (Posible Mezcla) " + claveActual, x);
+                            MessageBox.Show("El indice seleccionado es: " + ventanaInteractiva.IndiceSeleccionado);
+                            indiceDefinitivoPorIteracion = ventanaInteractiva.IndiceSeleccionado; 
+                            
                         }
                         //Caso 3: Clave encontrada; pero cliente no encontrado. 
                         else
                             if (encontrados == 0)
                             {
-                                mostrarVentanaInteractiva("No se ha encontrado ningún cliente para la clave " + claveActual);
-
+                                mostrarVentanaInteractiva("Caso 3: No se ha encontrado ningún cliente '" +  clienteActual +"' para la clave " + claveActual, x);
+                                indiceDefinitivoPorIteracion = ventanaInteractiva.IndiceSeleccionado; 
                                 //Cuando se cierre el diálogo se debera de acceder al índice seleccionado por el cliente en la tabla de "foundRowsTable"
                             }
 
@@ -393,17 +403,33 @@ namespace tablasDePedidos
                 //Caso 4: No se encontró la clave
                 else
                 {
-                    MessageBox.Show("No se ha encontrado la clave"); 
+                    MessageBox.Show("Caso 4: No se ha encontrado la clave"); 
                     arregloClavesNoEncontradas.Add(claveActual);
                     return;
                 }
+
+
+                agregaRegistroEnTabla(x, indiceDefinitivoPorIteracion); 
+
+
             }
         }
 
-        private void mostrarVentanaInteractiva(string aviso)
+        private void verificarMezcla()
+        {
+            //Se busca la clave con la menor longitud 
+
+
+            //Guardar ese valor en una variable 
+            //Buscar esa varible en la tabla 
+            
+        }
+
+        private void mostrarVentanaInteractiva(string aviso, int indice)
         {
             MessageBox.Show(aviso); 
-            getClienteActualRowInTable(tablaPedidosAntes.Rows[0]);
+            getPedidoActualRowInTable(tablaPedidosAntes.Rows[indice]);
+            
             ventanaInteractiva = new formVentanaInteractiva(foundRowsTable, clienteActualTable);
             ventanaInteractiva.ShowDialog();
         }
