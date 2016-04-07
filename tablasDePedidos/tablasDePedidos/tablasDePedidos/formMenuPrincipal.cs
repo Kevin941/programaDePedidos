@@ -41,8 +41,14 @@ namespace tablasDePedidos
             if (!tablaPedidosAntes.getPathOrigenPedidos())
             {
                 return;
-            }            
-            
+            }
+
+            MessageBox.Show("Por favor selecciona el destino del archivo resultante");
+            if (!tablaPedidosDespues.getDireccionDestino())
+            {
+                return; 
+            }
+
             invocarProcedimientoPrincipal();           
         }
 
@@ -110,7 +116,7 @@ namespace tablasDePedidos
         private void button2_Click(object sender, EventArgs e)
         {
             classTablasDePrueba nueva = new classTablasDePrueba();
-            dataGridPedidos.DataSource = nueva.getListaDeNombresDeColumnasEspecificaciones();
+           // dataGridPedidos.DataSource = nueva.getListaDeNombresDeColumnasEspecificaciones();
 
         }
     }

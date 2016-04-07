@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel; 
@@ -17,16 +18,21 @@ namespace tablasDePedidos
         public System.Data.DataTable tablaPedidosAntes = new System.Data.DataTable();
         public System.Data.DataTable tablaEspecificaciones = new System.Data.DataTable();
         Dictionary<string, string> diccionarioDeColumnas = new Dictionary<string, string>();
+        public FolderBrowserDialog dialogFolder = new FolderBrowserDialog();
         public System.Data.DataTable foundRowsTable;
         public System.Data.DataTable foundRowsTableClientes;
+        public System.Data.DataTable foundRowsTableMezclas;
         public System.Data.DataTable clienteActualTable;
         public formVentanaInteractiva ventanaInteractiva; 
         ArrayList arregloClavesNoEncontradas = new ArrayList();
         int indiceDefinitivoPorIteracion = 0;
         string claveActual = "";
         string clienteActual = "";
+        string ExcelFilePath=""; 
 
+        ArrayList componentesMezcla = new ArrayList(); 
         public DataRow[] foundRows;
+        public DataRow[] foundRowsMezclas;
         
         #endregion
 
@@ -124,41 +130,95 @@ namespace tablasDePedidos
         #endregion 
 
 
-        private void agregaRegistroEnTabla(int indicePedidosAntes, int indiceEspecificacionesReducida)
+        private void agregaRegistroEnTabla(int indicePedidosAntes)
         {
-            //Aquí se deben copiar los atributos de la tabla foundRowsTable en el indiceDefinitivoPorIteracion
-            //Combinar con los registros de la tabla tablaPedidosAntes.Rows[x]
-            //Y meterlos en el siguiente renglon de la tablaPedidosDespués
+            //Primero se agrega el registro al diccionario 
+            agregarRegistroAlDiccionario(indicePedidosAntes); 
+            
+            //Luego se agrega ese registro del diccionario a la tabla. Al final la tabla es más facil exportarla a excel. 
+            agregarDiccionarioEnTabla(); 
 
-            //Se actualizan los valores del arreglo para introducirlo a la tabla. 
-            diccionarioDeColumnas["Nombre del Cliente"] = tablaPedidosAntes.Rows[indicePedidosAntes][0].ToString();
-            diccionarioDeColumnas["Cantidad_Kg"] = foundRowsTable.Rows[indiceEspecificacionesReducida][0].ToString();
-            diccionarioDeColumnas["Unidad_Original"] = "valor";
-            diccionarioDeColumnas["Calibre"] = "valor";
-            diccionarioDeColumnas["Color"] = "valor";
-            diccionarioDeColumnas["Material"] = "valor";
-            diccionarioDeColumnas["Resina"] = "valor";
-            diccionarioDeColumnas["Clave"] = "valor";
-            diccionarioDeColumnas["Corte"] = "valor";
-            diccionarioDeColumnas["Lubricante"] = "valor";
-            diccionarioDeColumnas["Orientación"] = "valor";
-            diccionarioDeColumnas["No pedido"] = "valor";
-            diccionarioDeColumnas["Fecha Entrega"] = "valor";
-            diccionarioDeColumnas["ESP_SAE"] = "valor";
-            diccionarioDeColumnas["Rizado"] = "valor";
-            diccionarioDeColumnas["Perfil"] = "valor";
-            diccionarioDeColumnas["Aditivos"] = "valor";
-            diccionarioDeColumnas["Tipo de Mazo"] = "valor";
-            diccionarioDeColumnas["Bastón_Espejo_Tina"] = "valor";
-            diccionarioDeColumnas["Herramental"] = "valor";
-            diccionarioDeColumnas["Fabricar"] = "valor";
-            diccionarioDeColumnas["Temple"] = "valor";
-            diccionarioDeColumnas["Horno"] = "valor";
-            diccionarioDeColumnas["Teñido"] = "valor";
-            diccionarioDeColumnas["Enfundado"] = "valor";
-            diccionarioDeColumnas["Esp_Carretes"] = "valor";
+            foreach (int indiceComponente in componentesMezcla)
+            {
+                agregarRegistroAlDiccionario(indicePedidosAntes, indiceComponente);
+                agregarDiccionarioEnTabla(); 
+            }
 
-            //Se meten los valores a la tabla
+            //Se  limpia el arreglo para la siguiente iteración. 
+            componentesMezcla = new ArrayList();
+        }
+
+        private void agregarRegistroAlDiccionario(int indicePedidosAntes, int indiceComponente)
+        {
+            diccionarioDeColumnas["Nombre del Cliente"] = foundRowsTable.Rows[indiceComponente]["nombreDelCliente"].ToString();
+            diccionarioDeColumnas["Cantidad_Kg"] = tablaPedidosAntes.Rows[indicePedidosAntes]["Cantidad"].ToString();
+
+            //En caso de que las unidades se encuentren en LB se tendrá que hacer la conversión a KG
+            if ((tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString() == "LB")
+                || (tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString() == "lb")
+                || (tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString() == "Lb")
+                || (tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString() == "lB"))
+            {
+                diccionarioDeColumnas["Cantidad_Kg"] = Convert.ToString(Convert.ToDouble(diccionarioDeColumnas["Cantidad_Kg"]) * 0.453592);
+                diccionarioDeColumnas["Unidad_Original"] = "LB";
+            }
+            else
+            {
+                diccionarioDeColumnas["Unidad_Original"] = tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString();
+            }
+
+
+            diccionarioDeColumnas["Calibre"] = foundRowsTable.Rows[indiceComponente]["D"].ToString();
+            diccionarioDeColumnas["Color"] = foundRowsTable.Rows[indiceComponente]["E"].ToString();
+            diccionarioDeColumnas["Material"] = foundRowsTable.Rows[indiceComponente]["C"].ToString();
+            diccionarioDeColumnas["Resina"] = (foundRowsTable.Rows[indiceComponente]["L"].ToString()) + (foundRowsTable.Rows[indiceComponente]["O"].ToString());
+            diccionarioDeColumnas["Clave"] = foundRowsTable.Rows[indiceComponente]["clave"].ToString();
+            diccionarioDeColumnas["Corte"] = foundRowsTable.Rows[indiceComponente]["F"].ToString();
+            diccionarioDeColumnas["Lubricante"] = foundRowsTable.Rows[indiceComponente]["AU"].ToString();
+            diccionarioDeColumnas["Orientación"] = foundRowsTable.Rows[indiceComponente]["G"].ToString();
+            diccionarioDeColumnas["No pedido"] = tablaPedidosAntes.Rows[indicePedidosAntes]["No pedido"].ToString();
+
+            string fecha = tablaPedidosAntes.Rows[indicePedidosAntes]["Fecha Entrega"].ToString();
+            if (fecha.Length > 10)
+            {
+                fecha = fecha.Substring(0, 10);
+                fecha = fecha.Replace(".", "/");
+            }
+            diccionarioDeColumnas["Fecha Entrega"] = fecha;
+            diccionarioDeColumnas["ESP_SAE"] = tablaPedidosAntes.Rows[indicePedidosAntes]["Especificaciones"].ToString();
+            diccionarioDeColumnas["Rizado"] = foundRowsTable.Rows[indiceComponente]["I"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["J"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["K"].ToString();
+            diccionarioDeColumnas["Perfil"] = foundRowsTable.Rows[indiceComponente]["H"].ToString();
+            diccionarioDeColumnas["Aditivos"] = foundRowsTable.Rows[indiceComponente]["N"].ToString();
+            diccionarioDeColumnas["Tipo de Mazo"] = foundRowsTable.Rows[indiceComponente]["AN"].ToString();
+            diccionarioDeColumnas["Bastón_Espejo_Tina"] =
+                "Bastón " + foundRowsTable.Rows[indiceComponente]["Q"].ToString() +
+                "Espejo " + foundRowsTable.Rows[indiceComponente]["P"].ToString() +
+                "Tina " + foundRowsTable.Rows[indiceComponente]["R"].ToString();
+
+            diccionarioDeColumnas["Herramental"] = foundRowsTable.Rows[indiceComponente]["V"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["W"].ToString();
+            diccionarioDeColumnas["Fabricar"] = foundRowsTable.Rows[indiceComponente]["AC"].ToString();
+            diccionarioDeColumnas["Temple"] = foundRowsTable.Rows[indiceComponente]["AP"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AQ"].ToString();
+            diccionarioDeColumnas["Horno"] = foundRowsTable.Rows[indiceComponente]["AS"].ToString();
+            diccionarioDeColumnas["Teñido"] = foundRowsTable.Rows[indiceComponente]["AT"].ToString();
+            diccionarioDeColumnas["Enfundado"] = foundRowsTable.Rows[indiceComponente]["AX"].ToString();
+            diccionarioDeColumnas["Esp_Carretes"] = foundRowsTable.Rows[indiceComponente]["AD"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AE"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AF"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AG"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AH"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AI"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AJ"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AK"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AL"].ToString() +
+                foundRowsTable.Rows[indiceComponente]["AM"].ToString();
+        }
+
+        private void agregarDiccionarioEnTabla()
+        {
             tablaPedidosDespues.Rows.Add(
                diccionarioDeColumnas["Nombre del Cliente"],
                diccionarioDeColumnas["Cantidad_Kg"],
@@ -188,41 +248,80 @@ namespace tablasDePedidos
                diccionarioDeColumnas["Esp_Carretes"]);
         }
 
-        public void generarExcelDesdeDataTable2(DataTable tabla)
+        private void agregarRegistroAlDiccionario(int indicePedidosAntes)
         {
-            Excel.Application xlApp = new Excel.Application();
-            Excel.Workbook xlWorkBook = xlApp.Workbooks.Add();
-            Excel.Worksheet xlWorkSheet = xlWorkBook.Worksheets.Add(tabla, "tablaPedidosDespues");
-            //Excel.Worksheet xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
+            diccionarioDeColumnas["Nombre del Cliente"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["nombreDelCliente"].ToString();
+            diccionarioDeColumnas["Cantidad_Kg"] = tablaPedidosAntes.Rows[indicePedidosAntes]["Cantidad"].ToString();
 
-            //Lineas para generar un nuevo archivo
-
-
-
-            //Obtener celda de corte 
-            //Aqui va todo el procedimiento 
-
-
-            xlWorkBook.SaveAs("your-file-name.xls");
-            xlWorkBook.Close(true, null, null);
-            xlApp.Quit();
-
-            releaseObject(xlWorkSheet);
-            releaseObject(xlWorkBook);
-            releaseObject(xlApp);
-            Console.ReadKey();
+            //En caso de que las unidades se encuentren en LB se tendrá que hacer la conversión a KG
+            if ((tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString() == "LB")
+                || (tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString() == "lb")
+                || (tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString() == "Lb")
+                || (tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString() == "lB"))
+            {
+                diccionarioDeColumnas["Cantidad_Kg"] = Convert.ToString(Convert.ToDouble(diccionarioDeColumnas["Cantidad_Kg"]) * 0.453592);
+                diccionarioDeColumnas["Unidad_Original"] = "LB";
+            }
+            else
+            {
+                diccionarioDeColumnas["Unidad_Original"] = tablaPedidosAntes.Rows[indicePedidosAntes]["Unidad"].ToString();
+            }
 
 
+            diccionarioDeColumnas["Calibre"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["D"].ToString();
+            diccionarioDeColumnas["Color"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["E"].ToString();
+            diccionarioDeColumnas["Material"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["C"].ToString();
+            diccionarioDeColumnas["Resina"] = (foundRowsTable.Rows[indiceDefinitivoPorIteracion]["L"].ToString()) + (foundRowsTable.Rows[indiceDefinitivoPorIteracion]["O"].ToString());
+            diccionarioDeColumnas["Clave"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["clave"].ToString();
+            diccionarioDeColumnas["Corte"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["F"].ToString();
+            diccionarioDeColumnas["Lubricante"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AU"].ToString();
+            diccionarioDeColumnas["Orientación"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["G"].ToString();
+            diccionarioDeColumnas["No pedido"] = tablaPedidosAntes.Rows[indicePedidosAntes]["No pedido"].ToString();
+
+            string fecha = tablaPedidosAntes.Rows[indicePedidosAntes]["Fecha Entrega"].ToString();
+            if (fecha.Length > 10)
+            {
+                fecha = fecha.Substring(0, 10);
+                fecha = fecha.Replace(".", "/");
+            }
+            diccionarioDeColumnas["Fecha Entrega"] = fecha;
+            diccionarioDeColumnas["ESP_SAE"] = tablaPedidosAntes.Rows[indicePedidosAntes]["Especificaciones"].ToString();
+            diccionarioDeColumnas["Rizado"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["I"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["J"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["K"].ToString();
+            diccionarioDeColumnas["Perfil"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["H"].ToString();
+            diccionarioDeColumnas["Aditivos"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["N"].ToString();
+            diccionarioDeColumnas["Tipo de Mazo"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AN"].ToString();
+            diccionarioDeColumnas["Bastón_Espejo_Tina"] =
+                "Bastón " + foundRowsTable.Rows[indiceDefinitivoPorIteracion]["Q"].ToString() +
+                "Espejo " + foundRowsTable.Rows[indiceDefinitivoPorIteracion]["P"].ToString() +
+                "Tina " + foundRowsTable.Rows[indiceDefinitivoPorIteracion]["R"].ToString();
+
+            diccionarioDeColumnas["Herramental"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["V"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["W"].ToString();
+            diccionarioDeColumnas["Fabricar"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AC"].ToString();
+            diccionarioDeColumnas["Temple"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AP"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AQ"].ToString();
+            diccionarioDeColumnas["Horno"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AS"].ToString();
+            diccionarioDeColumnas["Teñido"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AT"].ToString();
+            diccionarioDeColumnas["Enfundado"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AX"].ToString();
+            diccionarioDeColumnas["Esp_Carretes"] = foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AD"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AE"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AF"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AG"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AH"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AI"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AJ"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AK"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AL"].ToString() +
+                foundRowsTable.Rows[indiceDefinitivoPorIteracion]["AM"].ToString();
         }
 
-        
-
-        
-
-
-        public void generarExcelDesdeDataTable(DataTable Tbl, string ExcelFilePath = null)
+       
+        public void generarExcelDesdeDataTable(DataTable Tbl)
         {
-            ExcelFilePath = "C:\\Users\\Juan\\Desktop\\programaDePedidos\\archivo.xls"; 
+            
+            
             try
         {
             if (Tbl == null || Tbl.Columns.Count == 0)
@@ -251,18 +350,41 @@ namespace tablasDePedidos
                 }
             }
 
+            //Se ajusta el alto de las filas
+            workSheet.UsedRange.EntireRow.RowHeight = 15;
+
+            //Se dibuja el borde de las celdas
+            Excel.Range _range;
+            _range = workSheet.UsedRange;
+            //Get the borders collection.
+            Excel.Borders borders = _range.Borders;
+            //Set the hair lines style.
+            borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+            borders.Weight = 2d;
+
+
+            //Se dibuja el borde gordo de las celdas primarias
+            _range = workSheet.get_Range("A1", "Z1");
+            //Get the borders collection.
+            borders = _range.Borders;
+            //Set the hair lines style.
+            borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+            borders.Weight = 3d;
+            _range.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.Yellow);
+               
+            
             // check fielpath
             if (ExcelFilePath != null && ExcelFilePath != "")
             {
                 try
-                {
+                {   
                     workSheet.SaveAs(ExcelFilePath);
                     excelApp.Quit();
-                    MessageBox.Show("Excel file saved!");
+                    MessageBox.Show(new Form() { TopMost = true }, "Archivo Guardado con éxito");
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("ExportToExcel: Excel file could not be saved! Check filepath.\n"
+                    throw new Exception("El archivo no se ha guardado. Verifica la dirección proporcionada.\n"
                         + ex.Message);
                 }
             }
@@ -273,9 +395,30 @@ namespace tablasDePedidos
         }
         catch(Exception ex)
         {
-            throw new Exception("ExportToExcel: \n" + ex.Message);
+            MessageBox.Show(new Form() { TopMost = true }, ex.Message);
         }
     }
+
+        public bool getDireccionDestino()
+        {
+            try
+            {
+                while (dialogFolder.ShowDialog() != DialogResult.OK)
+                {
+                    MessageBox.Show("Error al intentar abrir la ruta especificada");
+                    return false;
+
+                }
+
+                ExcelFilePath = dialogFolder.SelectedPath + "\\archivoPedidos.xlsx";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return false; 
+            }
+        }
 
         public void mostrarPedidosEnGrid(DataGridView grid)
         {
@@ -323,10 +466,7 @@ namespace tablasDePedidos
             return foundRowsTableClientes.Rows.Count; 
         }
         public void getTablaDePedidos()
-        {
-            
-
-            
+        {            
             //Si funciona el showDialog aunque se invoque este método desde un hilo
             //formMenuPrincipal ventana = new formMenuPrincipal();
             //ventana.ShowDialog(); 
@@ -338,18 +478,11 @@ namespace tablasDePedidos
 
 
             //Aquí va el procedimiento para cada uno de los índices de la tabla de Pedidos anterior
-            llenarValoresDeTablaPedidosDespues(); 
+            llenarValoresDeTablaPedidosDespues();
+            generarExcelDesdeDataTable(tablaPedidosDespues); 
 
-            mostrarReporte(); 
+            //mostrarReporte(); 
                 
-            
-
-            
-           
-            
-            
-
-            
         }
 
         private void llenarValoresDeTablaPedidosDespues()
@@ -376,26 +509,35 @@ namespace tablasDePedidos
                     if (encontrados == 1)
                     {
                         //Tomar ese único registro encotrado 
-                        MessageBox.Show("Caso 1: Correcto. Se ha encontrado la clave y un solo cliente.");
+                        //MessageBox.Show(new Form() { TopMost = true }, "Caso 1: Correcto. Se ha encontrado la clave y un solo cliente.");
                         indiceDefinitivoPorIteracion = 0; 
                     }
                     else
-                        //Caso 2: Se ha encontrado más de un cliente para esa clave. 
+                        //Caso 2: Se ha encontrado más de un cliente(el mismo) para esa clave. 
                         if (encontrados > 1)
                         {
-                            //Verificar si es mezcla Antes de mostrar la ventana interactiva. 
-                            verificarMezcla(); 
-                            mostrarVentanaInteractiva("Caso 2: Se ha encontrado más de un cliente '"+clienteActual + "'la clave. (Posible Mezcla) " + claveActual, x);
-                            MessageBox.Show("El indice seleccionado es: " + ventanaInteractiva.IndiceSeleccionado);
-                            indiceDefinitivoPorIteracion = ventanaInteractiva.IndiceSeleccionado; 
-                            
+                            if (!verificarMezcla())
+                            {
+                                //Mostrar ventana interactiva 
+                                mostrarVentanaInteractiva("Caso 2: Se ha encontrado más de un cliente '"+clienteActual + "'la clave. (Posible Mezcla) " + claveActual, x);
+                                //MessageBox.Show(new Form() { TopMost = true }, "El indice seleccionado es: " + ventanaInteractiva.IndiceSeleccionado);
+                                indiceDefinitivoPorIteracion = ventanaInteractiva.IndiceSeleccionado; 
+                            }
                         }
                         //Caso 3: Clave encontrada; pero cliente no encontrado. 
                         else
                             if (encontrados == 0)
                             {
-                                mostrarVentanaInteractiva("Caso 3: No se ha encontrado ningún cliente '" +  clienteActual +"' para la clave " + claveActual, x);
-                                indiceDefinitivoPorIteracion = ventanaInteractiva.IndiceSeleccionado; 
+                                if (foundRowsTable.Rows.Count == 1)
+                                {
+                                    indiceDefinitivoPorIteracion = 0;
+                                }
+                                else
+                                {
+                                    //En este caso verificar si lo que seleccionó el cliente es una mezcla
+                                    mostrarVentanaInteractiva("Caso 3: No se ha encontrado ningún cliente '" + clienteActual + "' para la clave " + claveActual, x);
+                                    indiceDefinitivoPorIteracion = ventanaInteractiva.IndiceSeleccionado;
+                                }
                                 //Cuando se cierre el diálogo se debera de acceder al índice seleccionado por el cliente en la tabla de "foundRowsTable"
                             }
 
@@ -403,31 +545,128 @@ namespace tablasDePedidos
                 //Caso 4: No se encontró la clave
                 else
                 {
-                    MessageBox.Show("Caso 4: No se ha encontrado la clave"); 
+                    //MessageBox.Show(new Form() { TopMost = true }, "Caso 4: No se ha encontrado la clave"); 
                     arregloClavesNoEncontradas.Add(claveActual);
                     return;
                 }
 
 
-                agregaRegistroEnTabla(x, indiceDefinitivoPorIteracion); 
-
+                agregaRegistroEnTabla(x); 
+                
 
             }
+
         }
 
-        private void verificarMezcla()
+        private bool verificarMezcla()
         {
+            componentesMezcla = new ArrayList(); 
+            bool esMezcla = false; 
+            //Se inicializa un string con una longitud muy larga. 
+            string claveMasCorta = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"; 
             //Se busca la clave con la menor longitud 
+            int indicePosibleMezcla = 0; 
+            for (int row = 0; row < foundRows.Length; row++)
+            {
+
+                if (foundRows[row][0].ToString().Length < claveMasCorta.Length)
+                {
 
 
-            //Guardar ese valor en una variable 
-            //Buscar esa varible en la tabla 
+                    claveMasCorta = foundRows[row][0].ToString();
+                    indicePosibleMezcla = row; 
+                }
+            }
+               
+
+            //MessageBox.Show(new Form() { TopMost = true }, "La clave maestra de la mezcla es: " + claveMasCorta);
+
+            string claveAnalizada; 
+            //Buscar esa varible en la tabla con un espacio seguido de cualquiera de los siguientes caracteres: A, L, R, 3D, S 
+            for (int row = 0; row < foundRowsTable.Rows.Count; row++)
+            {
+                bool matches; 
+                claveAnalizada = foundRowsTable.Rows[row]["clave"].ToString();
+
+                matches = Regex.IsMatch(claveAnalizada, "^" + claveMasCorta + "(.)*A(.)*");
+                if (matches == true)
+                {
+                    //Se agrega el índice del componente de la mezcla para poder agregarlo en el método de "agregaRegistroEnTabla"
+                    componentesMezcla.Add(row); 
+                    esMezcla = true;
+                    
+                }
+
+                matches = Regex.IsMatch(claveAnalizada, "^" + claveMasCorta + "(.)*B(.)*");
+                if (matches == true)
+                {
+                    //Se agrega el índice del componente de la mezcla para poder agregarlo en el método de "agregaRegistroEnTabla"
+                    componentesMezcla.Add(row);
+                    esMezcla = true;
+
+                }
+
+                matches = Regex.IsMatch(claveAnalizada, "^" + claveMasCorta + "(.)*C(.)*");
+                if (matches == true)
+                {
+                    //Se agrega el índice del componente de la mezcla para poder agregarlo en el método de "agregaRegistroEnTabla"
+                    componentesMezcla.Add(row);
+                    esMezcla = true;
+
+                }
+
+                matches = Regex.IsMatch(claveAnalizada, "^" + claveMasCorta + "(.)*D(.)*");
+                if (matches == true)
+                {
+                    //Se agrega el índice del componente de la mezcla para poder agregarlo en el método de "agregaRegistroEnTabla"
+                    componentesMezcla.Add(row);
+                    esMezcla = true;
+
+                }
+
+                matches = Regex.IsMatch(claveAnalizada, "^" + claveMasCorta + "(.)*L(.)*");
+                if (matches == true)
+                {
+                    componentesMezcla.Add(row); 
+                    esMezcla = true;
+                    
+                }
+
+                matches = Regex.IsMatch(claveAnalizada, "^" + claveMasCorta + "(.)*R(.)*");
+                if (matches == true)
+                {
+                    componentesMezcla.Add(row); 
+                    esMezcla = true;
+                    
+                }
+
+                matches = Regex.IsMatch(claveAnalizada, "^" + claveMasCorta + "(.)*3D(.)*");
+                if (matches == true)
+                {
+                    componentesMezcla.Add(row); 
+                    esMezcla = true;
+                    
+                }
+
+                matches = Regex.IsMatch(claveAnalizada, "^" + claveMasCorta + "(.)*S(.)*");
+                if (matches == true)
+                {
+                    componentesMezcla.Add(row); 
+                    esMezcla = true;
+                    
+                }               
+            }
+            if (esMezcla)
+            {
+                indiceDefinitivoPorIteracion = indicePosibleMezcla; 
+            }
+            return esMezcla; 
             
         }
 
         private void mostrarVentanaInteractiva(string aviso, int indice)
         {
-            MessageBox.Show(aviso); 
+            MessageBox.Show(new Form() { TopMost = true }, aviso); 
             getPedidoActualRowInTable(tablaPedidosAntes.Rows[indice]);
             
             ventanaInteractiva = new formVentanaInteractiva(foundRowsTable, clienteActualTable);

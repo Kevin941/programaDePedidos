@@ -147,6 +147,7 @@ namespace tablasDePedidos
                     "[Embobinado Carretes5] AS `AI`, " +
                     "[Embobinado Carretes6] AS `AJ`, " +
                     "[Embobinado Carretes7] AS `AK`, " +
+                    "[Embobinado Carretes8] AS `AL`, " +
                     "[Embobinado Carretes9] AS `AM`, " +
                     "[Rizado] AS `I`, " +
                     "[Rizado1] AS `J`, " +
