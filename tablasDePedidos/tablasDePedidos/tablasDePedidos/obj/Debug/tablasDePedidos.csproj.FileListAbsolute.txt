@@ -1,7 +1,6 @@
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\tablasDePedidos.exe.config
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\tablasDePedidos.exe
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\tablasDePedidos.pdb
-C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.csprojResolveAssemblyReference.cache
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.Properties.Resources.resources
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.csproj.GenerateResource.Cache
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.exe
@@ -10,3 +9,11 @@ C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDe
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formLoading.resources
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formVentanaInteractiva.resources
 C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formReportePrograma.resources
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formConfiguracionSalida.resources
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formValidacionSesion.resources
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\NPOI.dll
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\ICSharpCode.SharpZipLib.dll
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\bin\Debug\NPOI.xml
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.csprojResolveAssemblyReference.cache
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formMenuAdministrador.resources
+C:\Users\Juan\Desktop\programaDePedidos\tablasDePedidos\tablasDePedidos\tablasDePedidos\obj\Debug\tablasDePedidos.formCambiarRutas.resources

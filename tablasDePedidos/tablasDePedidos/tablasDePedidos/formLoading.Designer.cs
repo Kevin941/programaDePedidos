@@ -55,15 +55,16 @@
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
-            // formLoadEspecificaciones
+            // formLoading
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(232, 232);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.labelAccionActual);
-            this.Name = "formLoadEspecificaciones";
-            this.Text = "ventanaLoadEspecificaciones";
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "formLoading";
+            this.Text = "Cargando";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

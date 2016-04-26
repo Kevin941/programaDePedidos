@@ -1,0 +1,20 @@
+Nuevos casos: 
+
+"SUNSTAR AMERICAS, INC." --> "Sunstar Americas Inc."  (Caso feo de posible mezcla)
+Se confunde con "Sunstar Suisse, S.A." (Este no es sunshine o si?)
+
+Resuelto: "ANDERSON BRIGHTON DE MEXICO, S.A. DE C.V." --> "Anderson Brighton de México, S.A. de C.V."
+"POWER BRUSHES INC." -->"Power Brushes Inc."
+"PORTILLO MARTINEZ ERNESTO" --> "Portillo Martínez Ernesto"
+"PROCTER & GAMBLE MANUFACTURING GmbH" --> "P&G Manufacturing GmbH"
+TANIS FDL --> Tanis Incorporated
+SUNSTAR AMERICAS, INC. --> Sunstar Americas Inc.
+"GORDON BRUSH MFG. CO. INC."-->"Gordon Brush Mfg. Co., Inc."
+
+"BLOQUEADO" hay que bloquearlo 
+Para el caso 1: Tomar la clave exactamente igual sin tomar en cuenta el AN y antes normalizar el cliente .
+En primer Archivo de Enero: 
+Posible mezcla 
+
+En segundo Archivo: 
+Caso 3 claves diferentes que no son mezcla 

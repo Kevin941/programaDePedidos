@@ -1,0 +1,27 @@
+Nombre del Cliente|True
+Cantidad_Kg|True
+Unidad_Original|True
+Calibre|True
+Color|True
+Material|True
+Resina|True
+Clave|True
+Corte|True
+Lubricante|True
+Orientación|True
+No pedido|True
+Fecha Entrega|True
+TODO|True
+ESP_SAE|False
+Rizado|True
+Perfil|True
+Aditivos|True
+Tipo de Mazo|True
+Bastón_Espejo_Tina|True
+Herramental|True
+Fabricar|True
+Temple|True
+Horno|True
+Teñido|True
+Enfundado|True
+Esp_Carretes|True
